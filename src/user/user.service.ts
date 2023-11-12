@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { ModelType } from '@typegoose/typegoose/lib/types'
+import { DocumentType, ModelType } from '@typegoose/typegoose/lib/types'
 import { genSalt, hash } from 'bcryptjs'
 import { Types } from 'mongoose'
 import { InjectModel } from 'nestjs-typegoose'
@@ -11,38 +11,35 @@ export class UserService {
 	constructor(
 		@InjectModel(UserModel) private readonly UserModel: ModelType<UserModel>,
 	) {}
-	async getById(_id: string) {
-		const user = await this.UserModel.findById(_id)
+	async getById(id: string) {
+		const user = await this.UserModel.findById(id).exec()
 
-		if (!user) {
-			throw new NotFoundException('Пользователь не найден')
-		}
-		return user
+		if (user) return user
+
+		throw new NotFoundException('Пользователь не найден')
 	}
 
 	async updateProfile(_id: string, dto: UpdateUserDto) {
-		const user = await this.getById(_id)
+		const user = await this.UserModel.findById(_id)
 		const isSameUser = await this.UserModel.findOne({ email: dto.email })
 
 		if (isSameUser && String(_id) !== String(isSameUser._id)) {
 			throw new NotFoundException('Пользователь с таким email уже существует')
 		}
 
-		if (dto.password) {
-			const salt = await genSalt(10)
+		if (user) {
+			if (dto.password) {
+				const salt = await genSalt(10)
+				user.password = await hash(dto.password, salt)
+			}
+			user.email = dto.email
+			if (dto.isAdmin || dto.isAdmin === false) user.isAdmin = dto.isAdmin
 
-			user.password = await hash(dto.password, salt)
+			await user.save()
+			return
 		}
 
-		user.email = dto.email
-
-		if (dto.isAdmin || dto.isAdmin === false) {
-			user.isAdmin = dto.isAdmin
-		}
-
-		await user.save()
-
-		return
+		throw new NotFoundException('User not found')
 	}
 
 	async getCount() {
@@ -70,7 +67,7 @@ export class UserService {
 			.exec()
 	}
 
-	async delete(id: string) {
+	async delete(id: string): Promise<DocumentType<UserModel> | null> {
 		return this.UserModel.findByIdAndDelete(id).exec()
 	}
 
@@ -79,7 +76,7 @@ export class UserService {
 
 		await this.UserModel.findByIdAndUpdate(_id, {
 			favorites: favorites.includes(movieId)
-				? favorites.filter((item) => item.toString() !== movieId.toString())
+				? favorites.filter((item) => String(item) !== String(movieId))
 				: [...favorites, movieId],
 		})
 	}
