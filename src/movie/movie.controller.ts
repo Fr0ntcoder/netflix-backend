@@ -63,12 +63,19 @@ export class MovieController {
 		return this.movieService.getById(id)
 	}
 
-	@UsePipes(new ValidationPipe())
+	/* @UsePipes(new ValidationPipe())
 	@Post()
 	@HttpCode(200)
 	@Auth('admin')
 	async create() {
 		return this.movieService.create()
+	} */
+
+	@Post('create')
+	@HttpCode(200)
+	@Auth('admin')
+	async create(@Body() dto: MovieDto) {
+		return this.movieService.create(dto)
 	}
 
 	@UsePipes(new ValidationPipe())

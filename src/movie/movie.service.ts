@@ -100,7 +100,7 @@ export class MovieService {
 			.exec()
 	}
 
-	async create() {
+	/* async create() {
 		const defaultValue: MovieDto = {
 			bigPoster: '',
 			actors: [],
@@ -114,6 +114,17 @@ export class MovieService {
 		const movie = await this.MovieModel.create(defaultValue)
 
 		return movie._id
+	} */
+	async create(dto: MovieDto) {
+		const isExisit = await this.MovieModel.findOne({ name: dto.title })
+
+		if (isExisit) {
+			throw new Error('Этот фильм уже существует')
+		}
+
+		const movie = await this.MovieModel.create(dto)
+
+		return movie
 	}
 
 	async update(_id: string, dto: MovieDto) {

@@ -22,6 +22,12 @@ import { UserService } from './user.service'
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
+	@Get()
+	@Auth('admin')
+	async getAll(@Query('searchTerm') searchTerm?: string) {
+		return this.userService.getAll(searchTerm)
+	}
+
 	@Get('profile')
 	@Auth()
 	async getProfile(@User('_id') _id: string) {
@@ -56,12 +62,6 @@ export class UserController {
 	@Auth('admin')
 	async getCount() {
 		return this.userService.getCount()
-	}
-
-	@Get()
-	@Auth('admin')
-	async getAll(@Query('searchTerm') searchTerm?: string) {
-		return this.userService.getAll(searchTerm)
 	}
 
 	@Get(':id')

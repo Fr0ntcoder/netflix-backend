@@ -68,7 +68,7 @@ export class ActorService {
 			.exec()
 	}
 
-	async create() {
+	/* async creates() {
 		const defaultValue: ActorDto = {
 			name: '',
 			slug: '',
@@ -78,6 +78,18 @@ export class ActorService {
 		const actor = await this.ActorModel.create(defaultValue)
 
 		return actor._id
+	} */
+
+	async create(dto: ActorDto) {
+		const isExisit = await this.ActorModel.findOne({ name: dto.name })
+
+		if (isExisit) {
+			throw new Error('Этот актёр уже существует')
+		}
+
+		const actor = await this.ActorModel.create(dto)
+
+		return actor
 	}
 
 	async update(_id: string, dto: ActorDto) {

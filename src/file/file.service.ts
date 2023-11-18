@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { path } from 'app-root-path'
 import { ensureDir, writeFile } from 'fs-extra'
-import { FileResponse } from 'src/file/file.interface'
+import { FileResponse } from 'src/file/dto/file.dto'
 
 @Injectable()
 export class FileService {
