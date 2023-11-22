@@ -21,7 +21,6 @@ export class ActorController {
 	constructor(private readonly actorService: ActorService) {}
 
 	@Get('by-slug/:slug')
-	@Auth()
 	async getBySlug(@Param('slug') slug: string) {
 		return this.actorService.getBySlug(slug)
 	}

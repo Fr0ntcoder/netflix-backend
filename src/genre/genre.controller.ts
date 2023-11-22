@@ -22,7 +22,6 @@ export class GenreController {
 	constructor(private readonly genreService: GenreService) {}
 
 	@Get('by-slug/:slug')
-	@Auth()
 	async getBySlug(@Param('slug') slug: string) {
 		return this.genreService.getBySlug(slug)
 	}

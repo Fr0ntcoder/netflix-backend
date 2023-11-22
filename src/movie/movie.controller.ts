@@ -22,7 +22,6 @@ export class MovieController {
 	constructor(private readonly movieService: MovieService) {}
 
 	@Get('by-slug/:slug')
-	@Auth()
 	async getBySlug(@Param('slug') slug: string) {
 		return this.movieService.getBySlug(slug)
 	}
