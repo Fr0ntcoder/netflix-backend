@@ -21,7 +21,6 @@ export class ActorController {
 	constructor(private readonly actorService: ActorService) {}
 
 	@Get('by-slug/:slug')
-	@Auth()
 	async getBySlug(@Param('slug') slug: string) {
 		return this.actorService.getBySlug(slug)
 	}
@@ -37,12 +36,19 @@ export class ActorController {
 		return this.actorService.getById(id)
 	}
 
-	@UsePipes(new ValidationPipe())
+	/* @UsePipes(new ValidationPipe())
 	@Post()
 	@HttpCode(200)
 	@Auth('admin')
 	async create() {
 		return this.actorService.create()
+	} */
+
+	@Post('create')
+	@HttpCode(200)
+	@Auth('admin')
+	async create(@Body() dto: ActorDto) {
+		return this.actorService.create(dto)
 	}
 
 	@UsePipes(new ValidationPipe())

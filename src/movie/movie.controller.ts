@@ -22,7 +22,6 @@ export class MovieController {
 	constructor(private readonly movieService: MovieService) {}
 
 	@Get('by-slug/:slug')
-	@Auth()
 	async getBySlug(@Param('slug') slug: string) {
 		return this.movieService.getBySlug(slug)
 	}
@@ -63,12 +62,19 @@ export class MovieController {
 		return this.movieService.getById(id)
 	}
 
-	@UsePipes(new ValidationPipe())
+	/* @UsePipes(new ValidationPipe())
 	@Post()
 	@HttpCode(200)
 	@Auth('admin')
 	async create() {
 		return this.movieService.create()
+	} */
+
+	@Post('create')
+	@HttpCode(200)
+	@Auth('admin')
+	async create(@Body() dto: MovieDto) {
+		return this.movieService.create(dto)
 	}
 
 	@UsePipes(new ValidationPipe())

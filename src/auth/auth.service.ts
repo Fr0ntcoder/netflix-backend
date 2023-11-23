@@ -1,8 +1,4 @@
-import {
-	BadRequestException,
-	Injectable,
-	UnauthorizedException,
-} from '@nestjs/common'
+import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ModelType } from '@typegoose/typegoose/lib/types'
 import { compare, genSalt, hash } from 'bcryptjs'
@@ -17,23 +13,15 @@ export class AuthService {
 		@InjectModel(UserModel) private readonly UserModel: ModelType<UserModel>,
 		private readonly jwtService: JwtService,
 	) {}
-	async register(dto: AuthDto) {
-		const oldUser = await this.UserModel.findOne({ email: dto.email })
-
-		if (oldUser) {
-			throw new BadRequestException('Пользователь с таким email уже существует')
-		}
-
+	async register({ email, password }: AuthDto) {
 		const salt = await genSalt(10)
-
 		const newUser = new this.UserModel({
-			email: dto.email,
-			password: await hash(dto.password, salt),
+			email,
+			password: await hash(password, salt),
 		})
-
 		const user = await newUser.save()
 
-		const tokens = await this.issueTokenPair(user._id.toString())
+		const tokens = await this.issueTokenPair(String(user._id))
 
 		return {
 			user: this.returnUserFields(user),
@@ -41,10 +29,10 @@ export class AuthService {
 		}
 	}
 
-	async login(dto: AuthDto) {
-		const user = await this.validateUser(dto)
+	async login({ email, password }: AuthDto) {
+		const user = await this.validateUser(email, password)
 
-		const tokens = await this.issueTokenPair(user._id.toString())
+		const tokens = await this.issueTokenPair(String(user._id))
 
 		return {
 			user: this.returnUserFields(user),
@@ -65,22 +53,25 @@ export class AuthService {
 
 		const user = await this.UserModel.findById(result._id)
 
-		const tokens = await this.issueTokenPair(user._id.toString())
+		const tokens = await this.issueTokenPair(String(user._id))
 
 		return {
 			user: this.returnUserFields(user),
 			...tokens,
 		}
 	}
+	async findByEmail(email: string) {
+		return this.UserModel.findOne({ email }).exec()
+	}
 
-	async validateUser(dto: AuthDto): Promise<UserModel> {
-		const user = await this.UserModel.findOne({ email: dto.email })
+	async validateUser(email: string, password: string): Promise<UserModel> {
+		const user = await this.findByEmail(email)
 
 		if (!user) {
 			throw new UnauthorizedException('Пользователь не найден')
 		}
 
-		const isValidPassword = await compare(dto.password, user.password)
+		const isValidPassword = await compare(password, user.password)
 
 		if (!isValidPassword) {
 			throw new UnauthorizedException('Неверный пароль')

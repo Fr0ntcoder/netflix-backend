@@ -1,4 +1,4 @@
-export class FileRespsdddonse {
+export class FileResponse {
 	url: string
 	name: string
 }

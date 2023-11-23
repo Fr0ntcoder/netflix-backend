@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { ModelType } from '@typegoose/typegoose/lib/types'
+import { DocumentType, ModelType } from '@typegoose/typegoose/lib/types'
 import { InjectModel } from 'nestjs-typegoose'
 import { CreateGenreDto } from 'src/genre/dto/create-genre.dto'
 import { ICollection } from 'src/genre/genre.interface'
@@ -32,13 +32,16 @@ export class GenreService {
 
 		return collections
 	}
-	async getById(_id: string) {
-		const genre = await this.GenreModel.findById(_id)
 
-		if (!genre) {
-			throw new NotFoundException('Жанр не найден')
-		}
-		return genre
+	async getPopular(): Promise<DocumentType<GenreModel>[]> {
+		return this.GenreModel.find()
+			.select('-updatedAt -__v')
+			.sort({ createdAt: 'desc' })
+			.exec()
+	}
+
+	async getById(id: string): Promise<DocumentType<GenreModel>> {
+		return this.GenreModel.findById(id).exec()
 	}
 
 	async getBySlug(slug: string) {
@@ -77,7 +80,7 @@ export class GenreService {
 			.exec()
 	}
 
-	async create() {
+	/* async create() {
 		const defaultValue: CreateGenreDto = {
 			name: '',
 			slug: '',
@@ -88,18 +91,24 @@ export class GenreService {
 		const genre = await this.GenreModel.create(defaultValue)
 
 		return genre._id
-	}
+	} */
+	async create(dto: CreateGenreDto) {
+		const isExisit = await this.GenreModel.findOne({ name: dto.name })
 
-	async update(_id: string, dto: CreateGenreDto) {
-		const updateGenre = await this.GenreModel.findByIdAndUpdate(_id, dto, {
-			new: true,
-		}).exec()
-
-		if (!updateGenre) {
-			throw new NotFoundException('Жанр не найден')
+		if (isExisit) {
+			throw new Error('Этот жанр уже существует')
 		}
 
-		return updateGenre
+		const genre = await this.GenreModel.create(dto)
+
+		return genre
+	}
+
+	async update(
+		id: string,
+		dto: CreateGenreDto,
+	): Promise<DocumentType<GenreModel> | null> {
+		return this.GenreModel.findByIdAndUpdate(id, dto, { new: true }).exec()
 	}
 
 	async delete(id: string) {

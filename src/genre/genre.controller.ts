@@ -4,6 +4,7 @@ import {
 	Delete,
 	Get,
 	HttpCode,
+	NotFoundException,
 	Param,
 	Post,
 	Put,
@@ -21,7 +22,6 @@ export class GenreController {
 	constructor(private readonly genreService: GenreService) {}
 
 	@Get('by-slug/:slug')
-	@Auth()
 	async getBySlug(@Param('slug') slug: string) {
 		return this.genreService.getBySlug(slug)
 	}
@@ -29,6 +29,11 @@ export class GenreController {
 	@Get('collections')
 	async getCollections() {
 		return this.genreService.getCollection()
+	}
+
+	@Get('/popular')
+	async getPopular() {
+		return this.genreService.getPopular()
 	}
 
 	@Get()
@@ -42,12 +47,19 @@ export class GenreController {
 		return this.genreService.getById(id)
 	}
 
-	@UsePipes(new ValidationPipe())
+	/* @UsePipes(new ValidationPipe())
 	@Post()
 	@HttpCode(200)
 	@Auth('admin')
 	async create() {
 		return this.genreService.create()
+	} */
+
+	@Post('create')
+	@HttpCode(200)
+	@Auth('admin')
+	async create(@Body() dto: CreateGenreDto) {
+		return this.genreService.create(dto)
 	}
 
 	@UsePipes(new ValidationPipe())
@@ -58,7 +70,9 @@ export class GenreController {
 		@Param('id', IdValidationPipe) id: string,
 		@Body() dto: CreateGenreDto,
 	) {
-		return this.genreService.update(id, dto)
+		const updateGenre = await this.genreService.update(id, dto)
+		if (!updateGenre) throw new NotFoundException('Genre not found')
+		return updateGenre
 	}
 
 	@Delete(':id')
