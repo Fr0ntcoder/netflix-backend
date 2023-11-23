@@ -1,0 +1,30 @@
+{
+    "version": 2,
+    "env": {
+        "MONGO_URI": "@MONGO_URI",
+        "NODE_ENV": "@NODE_ENV",
+        "NODE_VERSION": "@NODE_VERSION",
+        "JWT_SECRET": "@JWT_SECRET",
+        "TELEGRAM_CHAT_ID": "@TELEGRAM_CHAT_ID",
+        "TELEGRAM_TOKEN": "@TELEGRAM_TOKEN",
+        "PORT": "@PORT"
+    },
+    "builds": [
+        {
+            "src": "src/main.ts",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "src/main.ts",
+            "methods": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE"
+            ]
+        }
+    ]
+}
