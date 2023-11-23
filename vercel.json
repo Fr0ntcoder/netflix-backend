@@ -1,13 +1,13 @@
 {
     "version": 2,
     "env": {
-        "MONGO_URI": "@MONGO_URI",
-        "NODE_ENV": "@NODE_ENV",
-        "NODE_VERSION": "@NODE_VERSION",
-        "JWT_SECRET": "@JWT_SECRET",
-        "TELEGRAM_CHAT_ID": "@TELEGRAM_CHAT_ID",
-        "TELEGRAM_TOKEN": "@TELEGRAM_TOKEN",
-        "PORT": "@PORT"
+        "MONGO_URI": "mongodb://frontcoder:o1H*eVIh@gagopafesh.beget.app/admin",
+        "NODE_ENV": "development",
+        "NODE_VERSION": "16.0.0",
+        "JWT_SECRET": "dfslkn33fdd",
+        "TELEGRAM_CHAT_ID": "1192664178",
+        "TELEGRAM_TOKEN": "6733078524:AAFOu7zBiAbn21gEB6DlDuU6wR_UlCqUh94",
+        "PORT": "4200"
     },
     "builds": [
         {
